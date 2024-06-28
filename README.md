@@ -33,6 +33,7 @@ After enabling this plugin, you can add the `Health` node as a child of another 
 1. Right-click on a node or press Ctrl+A.
 
 ![Add Node](https://github.com/JBSnippets/godot4-health/blob/main/assets/add_node0.png)
+
 2. Type "health" on the Search textbox of the Create New Node form to filter the node list and easily find the `Health` node.
 
 ![Add Node](https://github.com/JBSnippets/godot4-health/blob/main/assets/add_node1.png)
@@ -41,7 +42,7 @@ After enabling this plugin, you can add the `Health` node as a child of another 
 ![Add Node](https://github.com/JBSnippets/godot4-health/blob/main/assets/add_node2.png)
 
 ## 📺 Video on How to use the plugin.
-[![Watch the video](https://github.com/JBSnippets/godot4-health/blob/main/assets/JBSnippets_YT_Thumbnail_3.png)](https://www.youtube.com/watch?v=sRxTSfMPaKg)
+[![Watch the video](https://github.com/JBSnippets/godot4-health/blob/main/assets/JBSnippets%20YT%20Thumbnail%203.png)](https://www.youtube.com/watch?v=sRxTSfMPaKg)
 
 ## 📡 More Plugins!
 Head on over to my website at [https://plugins.jbsnippets.com](https://plugins.jbsnippets.com) to read more about this plugin and other plugins that I've been creating during my game development journey.

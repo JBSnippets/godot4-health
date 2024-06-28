@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3 uid="uid://8874t2tsr1ff"]
+
+[ext_resource type="Script" path="res://examples/ui_layer.gd" id="1_ggddp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xiajn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aur1a"]
+
+[node name="UILayer" type="CanvasLayer"]
+script = ExtResource("1_ggddp")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_xiajn")
+
+[node name="PanelContainer" type="PanelContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -128.0
+offset_right = -1.0
+offset_bottom = 88.0
+grow_horizontal = 0
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_aur1a")
+
+[node name="Revive" type="Button" parent="Panel/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Revive"
+
+[connection signal="pressed" from="Panel/PanelContainer/Revive" to="." method="_on_revive_pressed"]

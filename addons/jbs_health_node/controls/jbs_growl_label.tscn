@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk762qekrrnbt"]
+
+[ext_resource type="Script" path="res://addons/jbs_health_node/controls/jbs_growl_label.gd" id="1_tv12k"]
+
+[node name="JBSGrowlLabel" type="Label"]
+offset_left = -50.0
+offset_right = 50.0
+offset_bottom = 23.0
+size_flags_horizontal = 4
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_tv12k")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.4
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

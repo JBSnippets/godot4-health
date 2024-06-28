@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cky2jauflr6gh"]
+
+[ext_resource type="Script" path="res://examples/heart_1.gd" id="1_a0n57"]
+[ext_resource type="Texture2D" uid="uid://cuu0elg508v7g" path="res://examples/assets/heart1.png" id="1_sm056"]
+
+[node name="Heart1" type="Area2D"]
+script = ExtResource("1_a0n57")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+position = Vector2(-11.1488, -12.9326)
+polygon = PackedVector2Array(10.1526, 3.72266, 2.57137, -1.62878, -5.30713, 1.93884, -6.05038, 12.4931, 10.3012, 27.3581, 26.9501, 12.6417, 26.9501, 2.53345, 18.923, -1.48013)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_sm056")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

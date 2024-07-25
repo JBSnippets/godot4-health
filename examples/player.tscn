@@ -243,9 +243,9 @@ script = ExtResource("1_k10aw")
 [node name="GrowlPosition" type="Marker2D" parent="."]
 position = Vector2(0, -46)
 
-[node name="Health" type="Node" parent="." node_paths=PackedStringArray("health_bar")]
+[node name="Health" type="Node" parent="." node_paths=PackedStringArray("texture_progress")]
 script = ExtResource("2_7fou4")
-health_bar = NodePath("../HealthBar")
+texture_progress = NodePath("../HealthBar")
 behavior = 2
 change_percent = 10.0
 change_in_seconds = 1.0

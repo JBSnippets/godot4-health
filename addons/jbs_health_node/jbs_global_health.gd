@@ -1,3 +1,3 @@
 extends Node
 
-signal update(body: Node, amount: int, health: int)
+signal update(body: Node, amount: float, health: float)

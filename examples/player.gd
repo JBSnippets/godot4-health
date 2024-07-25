@@ -54,6 +54,6 @@ func _on_health_death():
 	animation_player.play("dead")
 
 
-func _on_health_revive(amount, health):
+func _on_health_revive(_amount, _health):
 	dead = false
 	animation_player.play("revive")

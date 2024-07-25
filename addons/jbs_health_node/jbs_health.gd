@@ -11,17 +11,17 @@ extends Node
 ## [color=orange]NOTE[/color]: If [param amount] is negative, the [signal damage] signal will be emitted; if it is positive, the [signal heal] signal will be emitted.[br][br]
 ##
 ## [color=orange]NOTE:[/color] If the JBS [code]GlobalHealth[/code] singleton is enabled, this signal is emitted on a global scale. The JBS [code]GlobalHealth[/code] singleton facilitates global relay of the [signal update] signal.
-signal update(body: Node, amount: int, health: int)
+signal update(body: Node, amount: float, health: float)
 
 ## This signal is emitted when the health is updated with a negative amount.[br][br]
 ##
 ## [color=orange]NOTE[/color]: This is emitted only if [member damageable] and [member emit_damage] are set to true.
-signal damage(damage: int, health: int)
+signal damage(damage: float, health: float)
 
 ## This signal is emitted when the health is updated with a positive amount.[br][br]
 ##
 ## [color=orange]NOTE[/color]: This is emitted only if [member healable] and [member emit_heal] are set to true.
-signal heal(recovery: int, health: int)
+signal heal(recovery: float, health: float)
 
 ## This signal is emitted when the health reaches or falls below 0.[br][br]
 ##
@@ -31,17 +31,20 @@ signal death()
 ## This signal is emitted when the health is updated with a positive [param amount] while the current health value is 0 or negative.[br][br]
 ##
 ## [color=orange]NOTE[/color]: This is emitted only if [member revivable] and [member emit_revive] are set to true.
-signal revive(amount: int, health: int)
+signal revive(amount: float, health: float)
 
 ## The current amount of health.
-@export var amount: int = 100
+@export var amount: float = 100
 
 ## The maximum amount of health.
-@export var max_amount: int = 100
+@export var max_amount: float = 100
 
 @export_category("Interface")
-## The visual representation of the health status.
-@export var health_bar: TextureProgressBar
+## The visual representation of the health status using [TextureProgressBar].
+@export var texture_progress: TextureProgressBar
+
+## The visual representation of the health status using [ProgressBar].
+@export var progress: ProgressBar
 
 ## The number of seconds until the health bar is hidden from view.[br][br]
 ##
@@ -140,11 +143,12 @@ func _create_show_timer():
 	_show_timer.timeout.connect(_on_show_timer_timeout)
 
 func _on_show_timer_timeout():
-	if health_bar != null:
-		if hide_in_seconds > 0:
-			health_bar.visible = false
-		else:
-			health_bar.visible = true
+	if hide_in_seconds > 0:
+		if texture_progress != null: texture_progress.visible = false
+		if progress != null: progress.visible = false
+	else:
+		if texture_progress != null: texture_progress.visible = true
+		if progress != null: progress.visible = true
 
 func _create_change_timer():
 	_change_timer = Timer.new()
@@ -183,16 +187,24 @@ func pause_behavior():
 
 ## A function to synchronize the health bar with the current health values.
 func sync_healthbar():
-	if health_bar != null:
-		health_bar.max_value = max_amount
-		health_bar.value = amount
+	if texture_progress != null:
+		texture_progress.max_value = max_amount
+		texture_progress.value = amount
 		if hide_in_seconds > 0:
-			health_bar.visible = false
+			texture_progress.visible = false
 		else:
-			health_bar.visible = true
+			texture_progress.visible = true
+
+	if progress != null:
+		progress.max_value = max_amount
+		progress.value = amount
+		if hide_in_seconds > 0:
+			progress.visible = false
+		else:
+			progress.visible = true
 
 ## A function that updates the health amount and emits signals based on the amount.
-func update_amount(_amount: int):
+func update_amount(_amount: float):
 	if _amount == 0: return
 	if (amount <= 0 and _amount > 0) and !revivable: return
 	if _amount < 0 and !damageable: return
@@ -217,9 +229,15 @@ func update_amount(_amount: int):
 	if global_health and !Engine.is_editor_hint():
 		global_health.emit_signal("update", get_parent(), _amount, amount)
 
-	if health_bar != null:
-		health_bar.visible = true
-		health_bar.value = amount
+	if texture_progress != null or progress != null:
+		if texture_progress != null:
+			texture_progress.visible = true
+			texture_progress.value = amount
+		
+		if progress != null:
+			progress.visible = true
+			progress.value = amount
+		
 		if hide_in_seconds > 0:
 			_show_timer.wait_time = hide_in_seconds
 			_show_timer.start()

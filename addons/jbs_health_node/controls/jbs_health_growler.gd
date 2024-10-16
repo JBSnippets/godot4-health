@@ -1,4 +1,3 @@
-@tool
 ## A simple health growl component to manage floating text that displays the amount of health change.
 ##
 ## The health growler will display floating text for a specified number of seconds, using [member damage_color] if the amount is less than 0, and [member heal_color] if the amount is greater than 0.[br][br]
@@ -15,12 +14,9 @@ extends Control
 ## The heal color of the floating text
 @export var heal_color: Color = Color.GREEN
 
-var _global_health
-
 func _ready():
-	if Engine.is_editor_hint(): return
-	_global_health = get_tree().root.get_node("/root/GlobalHealth")
-	if _global_health: _global_health.connect("update", _on_health_update)
+	var global_health = get_tree().root.get_node("/root/GlobalHealth")
+	if global_health: global_health.update.connect(_on_health_update)
 		
 func _on_health_update(body: Node, amount: int, health: int):
 	var growl_position = body.find_child("GrowlPosition")

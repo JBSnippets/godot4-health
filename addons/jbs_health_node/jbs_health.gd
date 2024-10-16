@@ -1,4 +1,3 @@
-@tool
 @icon("jbs_health_node.png")
 ## A custom node designed to store and update the health amount, emitting signals whenever the health amount changes.
 ##
@@ -6,12 +5,12 @@
 class_name Health
 extends Node
 
-## This signal is emitted when the health is updated. The parameter [param body] refers to the parent of this node, [param amount] is the value added to the health, and [param health] is the new health value after adding [param amount].[br][br]
+## This signal is emitted when the health is updated. The parameter [param body] refers to the parent of this node, [param delta_amount] is the value added to the health, and [param health] is the new health value after adding [param delta_amount].[br][br]
 ##
-## [color=orange]NOTE[/color]: If [param amount] is negative, the [signal damage] signal will be emitted; if it is positive, the [signal heal] signal will be emitted.[br][br]
+## [color=orange]NOTE[/color]: If [param delta_amount] is negative, the [signal damage] signal will be emitted; if it is positive, the [signal heal] signal will be emitted.[br][br]
 ##
 ## [color=orange]NOTE:[/color] If the JBS [code]GlobalHealth[/code] singleton is enabled, this signal is emitted on a global scale. The JBS [code]GlobalHealth[/code] singleton facilitates global relay of the [signal update] signal.
-signal update(body: Node, amount: float, health: float)
+signal update(body: Node, delta_amount: float, health: float)
 
 ## This signal is emitted when the health is updated with a negative amount.[br][br]
 ##
@@ -28,10 +27,10 @@ signal heal(recovery: float, health: float)
 ## [color=orange]NOTE[/color]: This is emitted only if [member damageable] and [member emit_death] are set to true.
 signal death()
 
-## This signal is emitted when the health is updated with a positive [param amount] while the current health value is 0 or negative.[br][br]
+## This signal is emitted when the health is updated with a positive [param delta_amount] while the current health value is 0 or negative.[br][br]
 ##
 ## [color=orange]NOTE[/color]: This is emitted only if [member revivable] and [member emit_revive] are set to true.
-signal revive(amount: float, health: float)
+signal revive(delta_amount: float, health: float)
 
 ## The current amount of health.
 @export var amount: float = 100
@@ -109,18 +108,45 @@ var _current_change_in_seconds: float = 0
 ## Returns the object's class name, as a [String]. This function overrides the [Object]'s built-in function [method Object.get_class].
 func get_class() -> String: return "Health"
 
-func _ready():
-	if Engine.is_editor_hint(): return
+func _ready() -> void:
 	_create_show_timer()
 	_create_change_timer()
 	_create_pause_timer()
 	sync_healthbar()
 
-func _process(_delta):
-	if Engine.is_editor_hint(): return
+func _process(_delta) -> void:
 	_check_behavior()
 
-func _check_behavior():
+func _create_show_timer() -> void:
+	_show_timer = Timer.new()
+	add_child(_show_timer)
+	_show_timer.one_shot = true
+	_show_timer.timeout.connect(_on_show_timer_timeout)
+
+func _on_show_timer_timeout() -> void:
+	if hide_in_seconds > 0:
+		if texture_progress != null: texture_progress.visible = false
+		if progress != null: progress.visible = false
+	else:
+		if texture_progress != null: texture_progress.visible = true
+		if progress != null: progress.visible = true
+
+func _create_change_timer() -> void:
+	_change_timer = Timer.new()
+	add_child(_change_timer)
+	_change_timer.one_shot = false
+	_change_timer.timeout.connect(_on_change_timer_timeout)
+	_check_behavior()
+
+func _on_change_timer_timeout() -> void:
+	if behavior == _behaviors.default: return
+	var percent = (change_percent / 100) * max_amount
+	if behavior == _behaviors.auto_increase and amount < max_amount:
+		update_amount(percent)
+	elif behavior == _behaviors.auto_decrease and amount > 0:
+		update_amount(-percent)
+
+func _check_behavior() -> void:
 	if behavior == _behaviors.default: return
 	if _change_timer.paused: return
 	if change_percent <= 0: return
@@ -136,57 +162,17 @@ func _check_behavior():
 		_change_timer.stop()
 	_current_change_in_seconds = change_in_seconds
 
-func _create_show_timer():
-	_show_timer = Timer.new()
-	add_child(_show_timer)
-	_show_timer.one_shot = true
-	_show_timer.timeout.connect(_on_show_timer_timeout)
-
-func _on_show_timer_timeout():
-	if hide_in_seconds > 0:
-		if texture_progress != null: texture_progress.visible = false
-		if progress != null: progress.visible = false
-	else:
-		if texture_progress != null: texture_progress.visible = true
-		if progress != null: progress.visible = true
-
-func _create_change_timer():
-	_change_timer = Timer.new()
-	add_child(_change_timer)
-	_change_timer.one_shot = false
-	_change_timer.timeout.connect(_on_change_timer_timeout)
-	_check_behavior()
-	
-func _on_change_timer_timeout():
-	if behavior == _behaviors.default: return
-	var percent = (change_percent / 100) * max_amount
-	if behavior == _behaviors.auto_increase and amount < max_amount:
-		update_amount(percent)
-	elif behavior == _behaviors.auto_decrease and amount > 0:
-		update_amount(-percent)
-
-func _create_pause_timer():
+func _create_pause_timer() -> void:
 	_pause_timer = Timer.new()
 	add_child(_pause_timer)
 	_pause_timer.one_shot = false
 	_pause_timer.timeout.connect(_on_pause_timer_timeout)
 
-func _on_pause_timer_timeout():
+func _on_pause_timer_timeout() -> void:
 	_change_timer.paused = false
 
-## A function to check if the automatic health change is paused.
-func is_behavior_paused() -> bool:
-	return _change_timer.paused
-
-## A function to pause the automatic health change for a specified number of seconds using the [member pause_in_seconds] value.[br][br]
-##
-## [color=orange]NOTE[/color]: Changing the behavior to default will not stop the pause timer. However, if the behavior is restarted while the pause timer is active, it will likely delay the start of the change timer until the pause timer expires.
-func pause_behavior():
-	if _change_timer.is_stopped(): return
-	_change_timer.paused = true
-
 ## A function to synchronize the health bar with the current health values.
-func sync_healthbar():
+func sync_healthbar() -> void:
 	if texture_progress != null:
 		texture_progress.max_value = max_amount
 		texture_progress.value = amount
@@ -203,31 +189,44 @@ func sync_healthbar():
 		else:
 			progress.visible = true
 
-## A function that updates the health amount and emits signals based on the amount.
-func update_amount(_amount: float):
-	if _amount == 0: return
-	if (amount <= 0 and _amount > 0) and !revivable: return
-	if _amount < 0 and !damageable: return
-	if _amount > 0 and !healable: return
-	
-	var old_amount = amount
+## A function to check if the automatic health change is paused.
+func is_behavior_paused() -> bool:
+	return _change_timer.paused
+
+## A function to pause the automatic health change for a specified number of seconds using the [member pause_in_seconds] value.[br][br]
+##
+## [color=orange]NOTE[/color]: Changing the behavior to default will not stop the pause timer. However, if the behavior is restarted while the pause timer is active, it will likely delay the start of the change timer until the pause timer expires.
+func pause_behavior() -> void:
+	if _change_timer.is_stopped(): return
+	_change_timer.paused = true
+	_pause_timer.wait_time = pause_in_seconds
+	_pause_timer.start()
+
+## A function that updates the health amount adding the [param delta_amount] value and emits signals based on the amount.
+func update_amount(delta_amount: float) -> void:
+	var is_dead = amount <= 0
+
+	if delta_amount == 0: return
+	if !revivable and (is_dead and delta_amount > 0): return
+	if !damageable and delta_amount < 0: return
+	if !healable and delta_amount > 0: return
 	
 	# check if exceeds maximum health
-	if _amount > max_amount || (amount + _amount) > max_amount:
+	if delta_amount > max_amount || (amount + delta_amount) > max_amount:
 		amount = max_amount # set to maximum
 	else:
-		amount += _amount # add to health
+		amount += delta_amount # add to health
 	
 	# ensure our health is 0 to avoid missing health amount when revived
 	if amount < 0: amount = 0;
 	
 	# emit the local signal
-	emit_signal("update", get_parent(), _amount, amount)
+	update.emit(get_parent(), delta_amount, amount)
 	
 	# emit the global signal if available
 	var global_health = get_tree().root.get_node("/root/GlobalHealth")
-	if global_health and !Engine.is_editor_hint():
-		global_health.emit_signal("update", get_parent(), _amount, amount)
+	if global_health:
+		global_health.update.emit(get_parent(), delta_amount, amount)
 
 	if texture_progress != null or progress != null:
 		if texture_progress != null:
@@ -242,13 +241,12 @@ func update_amount(_amount: float):
 			_show_timer.wait_time = hide_in_seconds
 			_show_timer.start()
 
-	if _amount > 0:
-		if emit_heal: emit_signal("heal", _amount, amount)
-		if old_amount == 0:
-			if emit_revive: emit_signal("revive", _amount, amount)
+	if delta_amount > 0:
+		if emit_heal: heal.emit(delta_amount, amount)
+		if is_dead and emit_revive: revive.emit(delta_amount, amount)
 		return
-	elif _amount < 0:
-		if emit_damage: emit_signal("damage", _amount, amount)
+	elif delta_amount < 0:
+		if emit_damage: damage.emit(delta_amount, amount)
 
 	if amount == 0:
-		if emit_death: emit_signal("death")
+		if emit_death: death.emit()

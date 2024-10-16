@@ -48,11 +48,9 @@ func _physics_process(delta):
 func health_update(amount: int):
 	health.update_amount(amount)
 
-
 func _on_health_death():
 	dead = true
 	animation_player.play("dead")
-
 
 func _on_health_revive(_amount, _health):
 	dead = false

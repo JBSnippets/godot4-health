@@ -10,10 +10,10 @@ const JUMP_VELOCITY = -400.0
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var dead: bool =false
 
-func _ready():
+func _ready() -> void:
 	animation_player.play("idle")
 
-func _physics_process(delta):
+func _physics_process(delta) -> void:
 	# Add the gravity
 	if not is_on_floor():
 		velocity.y += gravity * delta
@@ -45,13 +45,13 @@ func _physics_process(delta):
 
 	move_and_slide()
 
-func health_update(amount: int):
+func health_update(amount: float) -> void:
 	health.update_amount(amount)
 
-func _on_health_death():
+func _on_health_death() -> void:
 	dead = true
 	animation_player.play("dead")
 
-func _on_health_revive(_amount, _health):
+func _on_health_revive(_amount, _health) -> void:
 	dead = false
 	animation_player.play("revive")

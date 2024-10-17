@@ -105,8 +105,8 @@ var _change_timer: Timer
 var _pause_timer: Timer
 var _current_change_in_seconds: float = 0
 
-## Returns the object's class name, as a [String]. This function overrides the [Object]'s built-in function [method Object.get_class].
-func get_class() -> String: return "Health"
+## Returns the object's class name, as a [String].
+func get_class_name() -> String: return "Health"
 
 func _ready() -> void:
 	_create_show_timer()
